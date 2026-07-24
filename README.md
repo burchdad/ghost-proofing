@@ -6,22 +6,20 @@ Ghost Proofing is a private photography proofing MVP. Photographers upload origi
 
 - Next.js App Router, TypeScript, Tailwind CSS
 - Railway Postgres via `DATABASE_URL`
-- S3-compatible blob storage for originals and previews
+- Vercel Blob storage for originals and previews
 - Stripe Checkout plus verified Stripe webhooks
 - Sharp preview generation with real pixel watermarks
 - Resend transactional email for download links
 
-The original prompt named Supabase Postgres and Supabase Storage. This repo is configured for Railway Postgres and generic S3-compatible blob storage instead. Originals should stay in a private bucket. Previews can be public or private, but this implementation streams previews through `/api/blob/preview/[photoId]`.
+The original prompt named Supabase Postgres and Supabase Storage. This repo is configured for Railway Postgres and Vercel Blob instead. Originals are stored as private blobs. Previews are stored separately as public blobs and are still streamed through `/api/blob/preview/[photoId]`.
 
 The scaffold uses the current patched Next.js release instead of pinning to the requested Next 15 line because NPM marks that line as deprecated for a security issue.
 
 ## Setup
 
 1. Create a Railway Postgres service and copy its connection string into `DATABASE_URL`.
-2. Create two S3-compatible buckets:
-   - `ghost-proofing-originals`
-   - `ghost-proofing-previews`
-3. Copy `.env.example` to `.env.local` and fill in every secret.
+2. Connect a Vercel Blob store to the Vercel project. Use private access for the store when available.
+3. Copy `.env.example` to `.env.local` and fill in every secret. For Vercel deployments connected to Blob, Vercel provides Blob credentials automatically. For local dev, run `vercel env pull .env.local --yes` after the store is connected.
 4. Run the migration:
 
 ```bash
@@ -60,7 +58,7 @@ Set the resulting secret as `STRIPE_WEBHOOK_SECRET`. The webhook verifies Stripe
 ## Security Notes
 
 - Originals are never rendered in a page or exposed as public URLs.
-- Individual original download clicks redirect to a 15-minute signed object URL only after checking the token, order status, token expiry, download limit, and purchased photo.
+- Individual original download clicks redirect to a 15-minute signed private Blob URL only after checking the token, order status, token expiry, download limit, and purchased photo.
 - ZIP downloads stream originals server-side after the same token and paid-order checks.
 - Browser price values are ignored. The checkout route recalculates all totals from Postgres.
 - File type and size validation runs before upload processing.
