@@ -3,15 +3,15 @@ import "server-only";
 import sharp from "sharp";
 import type { Gallery } from "@/lib/types";
 
-const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
-const maxSizeBytes = 25 * 1024 * 1024;
+const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"]);
+const maxSizeBytes = 50 * 1024 * 1024;
 
 export function assertPhotoFile(file: File) {
   if (!allowedTypes.has(file.type)) {
-    throw new Error("Only JPG, PNG, and WebP images are supported.");
+    throw new Error("Only JPG, PNG, WebP, HEIC, and HEIF images are supported.");
   }
   if (file.size > maxSizeBytes) {
-    throw new Error("Each photo must be 25 MB or smaller.");
+    throw new Error("Each photo must be 50 MB or smaller.");
   }
 }
 

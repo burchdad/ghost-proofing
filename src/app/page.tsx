@@ -12,7 +12,7 @@ export default function Home() {
           </div>
           <Link
             href="/login"
-            className="inline-flex h-10 items-center rounded-md border border-white/15 px-4 text-sm text-stone-100 hover:bg-white/10"
+            className="inline-flex h-11 items-center rounded-md border border-white/15 px-4 text-sm text-stone-100 hover:bg-white/10"
           >
             Studio sign in
           </Link>

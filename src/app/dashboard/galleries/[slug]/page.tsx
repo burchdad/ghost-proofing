@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { updateGalleryStatusAction, uploadPhotosAction } from "@/app/dashboard/actions";
+import { PhotoUploadForm } from "@/app/dashboard/galleries/[slug]/PhotoUploadForm";
+import { updateGalleryStatusAction } from "@/app/dashboard/actions";
 import { requireAdmin } from "@/lib/auth";
 import { getEnv } from "@/lib/env";
 import { money } from "@/lib/format";
@@ -53,25 +54,9 @@ export default async function GalleryAdminPage({
           </div>
         </header>
 
-        <section className="grid gap-8 lg:grid-cols-[360px_1fr]">
-          <div className="space-y-5">
-            <form action={uploadPhotosAction} className="space-y-4 rounded-md border border-white/10 bg-white/[0.03] p-5">
-              <h2 className="text-lg font-medium">Upload originals</h2>
-              <input type="hidden" name="slug" value={gallery.slug} />
-              <input
-                name="photos"
-                type="file"
-                multiple
-                accept="image/jpeg,image/png,image/webp"
-                className="block w-full rounded-md border border-white/10 bg-black p-3 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-stone-100 file:px-3 file:py-2 file:text-black"
-              />
-              <p className="text-sm text-stone-400">
-                Uploads are validated server-side, originals go to the private originals bucket, and previews are watermarked before storage.
-              </p>
-              <button className="h-11 w-full rounded-md bg-stone-100 font-medium text-black hover:bg-amber-100">
-                Process photos
-              </button>
-            </form>
+        <section className="grid gap-6 lg:grid-cols-[380px_1fr]">
+          <div className="space-y-5 lg:sticky lg:top-6 lg:self-start">
+            <PhotoUploadForm slug={gallery.slug} />
             <div className="rounded-md border border-white/10 p-5 text-sm text-stone-300">
               <p>Per-photo price: {money(gallery.default_price_cents)}</p>
               <p>Full gallery: {gallery.full_gallery_price_cents ? money(gallery.full_gallery_price_cents) : "Disabled"}</p>
