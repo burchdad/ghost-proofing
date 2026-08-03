@@ -7,36 +7,37 @@ export default async function LoginPage({
 }) {
   const { error } = await searchParams;
   return (
-    <main className="grid min-h-screen place-items-center bg-[#050505] px-6">
-      <form action={loginAction} className="w-full max-w-sm space-y-5">
-        <div>
-          <p className="text-sm uppercase tracking-[0.28em] text-amber-200/80">Studio access</p>
-          <h1 className="mt-3 text-3xl font-semibold text-stone-50">Sign in</h1>
+    <main className="grid min-h-screen place-items-center bg-[#f7f4ee] px-5 py-10 text-stone-950">
+      <form action={loginAction} className="w-full max-w-sm rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+        <div className="mb-6">
+          <p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-700">Studio access</p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight">Sign in</h1>
+          <p className="mt-2 text-sm leading-6 text-stone-500">Manage proof galleries, uploads, checkout, and downloads.</p>
         </div>
         {error ? (
-          <p className="rounded-md border border-red-400/30 bg-red-950/30 px-3 py-2 text-sm text-red-100">
+          <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
             The email or password was not recognized.
           </p>
         ) : null}
-        <label className="block text-sm text-stone-300">
+        <label className="block text-sm font-semibold text-stone-600">
           Email
           <input
             name="email"
             type="email"
             required
-            className="mt-2 h-11 w-full rounded-md border border-white/10 bg-white/5 px-3 text-stone-50 outline-none focus:border-amber-200/70"
+            className="mt-2 h-11 w-full rounded-lg border border-stone-300 bg-white px-3 text-stone-950 outline-none focus:border-stone-950"
           />
         </label>
-        <label className="block text-sm text-stone-300">
+        <label className="mt-4 block text-sm font-semibold text-stone-600">
           Password
           <input
             name="password"
             type="password"
             required
-            className="mt-2 h-11 w-full rounded-md border border-white/10 bg-white/5 px-3 text-stone-50 outline-none focus:border-amber-200/70"
+            className="mt-2 h-11 w-full rounded-lg border border-stone-300 bg-white px-3 text-stone-950 outline-none focus:border-stone-950"
           />
         </label>
-        <button className="h-11 w-full rounded-md bg-stone-100 text-sm font-medium text-black hover:bg-amber-100">
+        <button className="mt-5 h-11 w-full rounded-lg bg-stone-950 text-sm font-semibold text-white hover:bg-stone-800">
           Enter dashboard
         </button>
       </form>

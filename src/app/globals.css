@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050505;
-  --foreground: #f7f2eb;
+  --background: #f7f4ee;
+  --foreground: #1c1917;
 }
 
 @theme inline {
@@ -30,5 +30,9 @@ select {
 
 input,
 select {
-  color-scheme: dark;
+  color-scheme: light;
+}
+
+button {
+  cursor: pointer;
 }
