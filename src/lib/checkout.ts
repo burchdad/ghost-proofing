@@ -33,8 +33,8 @@ export async function calculateOrder({
 }): Promise<CalculatedOrder> {
   const distinctIds = Array.from(new Set(photoIds));
   const photoResult = await sql<Photo>(
-    "select * from photos where gallery_id = $1 order by sort_order, created_at",
-    [gallery.id],
+    "select * from photos where gallery_id = $1 and studio_id = $2 order by sort_order, created_at",
+    [gallery.id, gallery.studio_id],
   );
   const allPhotos: Photo[] = photoResult.rows;
   if (fullGallery) {

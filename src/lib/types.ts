@@ -1,17 +1,39 @@
 export type GalleryStatus = "draft" | "published" | "archived";
 export type WatermarkLayout = "center" | "tile";
 export type OrderStatus = "pending" | "paid" | "expired" | "refunded";
+export type ProfileRole = "platform_admin" | "photographer" | "assistant" | "admin" | "customer";
+
+export type Studio = {
+  id: string;
+  name: string;
+  slug: string;
+  contact_email: string | null;
+  default_branding_name: string;
+  default_price_cents: number;
+  default_full_gallery_price_cents: number | null;
+  default_watermark_text: string;
+  default_watermark_opacity: string;
+  default_watermark_size: number;
+  default_watermark_spacing: number;
+  default_watermark_angle: number;
+  default_watermark_layout: WatermarkLayout;
+  default_download_limit: number;
+  created_at: string;
+};
 
 export type Profile = {
   id: string;
   email: string;
   display_name: string;
-  role: "admin" | "customer";
+  role: ProfileRole;
   branding_name: string;
+  studio_id: string | null;
+  studio_name?: string | null;
 };
 
 export type Gallery = {
   id: string;
+  studio_id: string;
   owner_id: string;
   slug: string;
   title: string;
@@ -35,6 +57,7 @@ export type Gallery = {
 
 export type Photo = {
   id: string;
+  studio_id: string;
   gallery_id: string;
   original_key: string;
   preview_key: string;
@@ -49,6 +72,7 @@ export type Photo = {
 
 export type Order = {
   id: string;
+  studio_id: string;
   gallery_id: string;
   customer_email: string;
   stripe_checkout_session_id: string | null;

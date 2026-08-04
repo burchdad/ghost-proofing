@@ -72,16 +72,35 @@ export async function getCurrentProfile() {
   const profileId = await readSession();
   if (!profileId) return null;
   const { rows } = await sql<Profile>(
-    "select id, email, display_name, role, branding_name from profiles where id = $1",
+    `select p.id, p.email, p.display_name, p.role, p.branding_name, p.studio_id, s.name as studio_name
+     from profiles p
+     left join studios s on s.id = p.studio_id
+     where p.id = $1`,
     [profileId],
   );
   return rows[0] ?? null;
 }
 
+export function isPlatformAdmin(profile: Profile) {
+  return profile.role === "platform_admin";
+}
+
+export function canManageStudio(profile: Profile) {
+  return ["platform_admin", "photographer", "assistant", "admin"].includes(profile.role);
+}
+
 export async function requireAdmin() {
   const profile = await getCurrentProfile();
-  if (!profile || profile.role !== "admin") {
+  if (!profile || !canManageStudio(profile)) {
     redirect("/login");
+  }
+  return profile;
+}
+
+export async function requirePlatformAdmin() {
+  const profile = await requireAdmin();
+  if (!isPlatformAdmin(profile)) {
+    redirect("/dashboard");
   }
   return profile;
 }

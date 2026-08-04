@@ -35,9 +35,9 @@ export async function POST(
   });
   const env = getEnv();
   const inserted = await sql<{ id: string }>(
-    `insert into orders (gallery_id, customer_email, status, total_cents, currency, purchased_full_gallery)
-     values ($1,$2,'pending',$3,$4,$5) returning id`,
-    [gallery.id, email, order.total, env.STRIPE_PRICE_CURRENCY, order.purchasedFullGallery],
+    `insert into orders (studio_id, gallery_id, customer_email, status, total_cents, currency, purchased_full_gallery)
+     values ($1,$2,$3,'pending',$4,$5,$6) returning id`,
+    [gallery.studio_id, gallery.id, email, order.total, env.STRIPE_PRICE_CURRENCY, order.purchasedFullGallery],
   );
   const orderId = inserted.rows[0].id;
   for (const photo of order.photos) {

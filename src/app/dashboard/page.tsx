@@ -14,11 +14,11 @@ import {
 } from "lucide-react";
 import { logoutAction } from "@/app/actions";
 import { createGalleryAction } from "@/app/dashboard/actions";
-import { requireAdmin } from "@/lib/auth";
+import { isPlatformAdmin, requireAdmin } from "@/lib/auth";
 import { getEnv } from "@/lib/env";
 import { money } from "@/lib/format";
 import { sql } from "@/lib/db";
-import type { Gallery } from "@/lib/types";
+import type { Gallery, Studio } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -46,19 +46,26 @@ function metric(label: string, value: string, icon: React.ReactNode) {
 export default async function DashboardPage() {
   const profile = await requireAdmin();
   const env = getEnv();
-  const galleryResult = await sql<GallerySummary>(
-    `select g.*,
-      count(distinct p.id)::text as photo_count,
-      count(distinct o.id) filter (where o.status = 'paid')::text as paid_order_count
-     from galleries g
-     left join photos p on p.gallery_id = g.id
-     left join orders o on o.gallery_id = g.id
-     where g.owner_id = $1
-     group by g.id
-     order by g.created_at desc`,
-    [profile.id],
-  );
+  const platformAdmin = isPlatformAdmin(profile);
+  const [galleryResult, studioResult] = await Promise.all([
+    sql<GallerySummary>(
+      `select g.*,
+        count(distinct p.id)::text as photo_count,
+        count(distinct o.id) filter (where o.status = 'paid')::text as paid_order_count
+       from galleries g
+       left join photos p on p.gallery_id = g.id
+       left join orders o on o.gallery_id = g.id
+       where ($1::boolean = true or g.studio_id = $2)
+       group by g.id
+       order by g.created_at desc`,
+      [platformAdmin, profile.studio_id],
+    ),
+    profile.studio_id
+      ? sql<Studio>("select * from studios where id = $1", [profile.studio_id])
+      : sql<Studio>("select * from studios order by created_at asc limit 1"),
+  ]);
   const galleries = galleryResult.rows;
+  const studioDefaults = studioResult.rows[0];
   const publishedCount = galleries.filter((gallery) => gallery.status === "published").length;
   const photoCount = galleries.reduce((sum, gallery) => sum + Number(gallery.photo_count ?? 0), 0);
   const paidOrderCount = galleries.reduce((sum, gallery) => sum + Number(gallery.paid_order_count ?? 0), 0);
@@ -79,6 +86,14 @@ export default async function DashboardPage() {
             </span>
           </Link>
           <div className="flex flex-wrap items-center gap-2">
+            {platformAdmin ? (
+              <Link
+                href="/dashboard/studios"
+                className="inline-flex h-10 items-center rounded-lg border border-stone-300 bg-white px-3 text-sm font-semibold text-stone-700 hover:border-stone-950"
+              >
+                Studios
+              </Link>
+            ) : null}
             <a
               href="https://kaisynphotography.vercel.app"
               className="inline-flex h-10 items-center rounded-lg border border-stone-300 bg-white px-3 text-sm font-semibold text-stone-700 hover:border-stone-950"
@@ -98,7 +113,9 @@ export default async function DashboardPage() {
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.22em] text-amber-700">Photographer dashboard</p>
             <h1 className="mt-3 max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-stone-950 sm:text-5xl">
-              Create proof galleries, watermark uploads, and track paid orders.
+              {platformAdmin
+                ? "Manage studios, proof galleries, watermark uploads, and paid orders."
+                : "Create proof galleries, watermark uploads, and track paid orders."}
             </h1>
           </div>
           <div className="rounded-xl border border-stone-200 bg-stone-950 p-5 text-stone-50 shadow-sm">
@@ -127,7 +144,9 @@ export default async function DashboardPage() {
               </span>
               <div>
                 <h2 className="text-lg font-semibold">Create gallery</h2>
-                <p className="text-sm text-stone-500">Set the client, pricing, access, and watermark defaults.</p>
+                <p className="text-sm text-stone-500">
+                  Set the client, pricing, access, and watermark defaults for {profile.studio_name ?? "this studio"}.
+                </p>
               </div>
             </div>
 
@@ -157,30 +176,57 @@ export default async function DashboardPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <label className="grid gap-1 text-sm font-semibold text-stone-600">
                     Per photo
-                    <input name="defaultPrice" type="number" min="0" step="0.01" defaultValue="25" className={fieldClassName()} />
+                    <input
+                      name="defaultPrice"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      defaultValue={((studioDefaults?.default_price_cents ?? 2500) / 100).toString()}
+                      className={fieldClassName()}
+                    />
                   </label>
                   <label className="grid gap-1 text-sm font-semibold text-stone-600">
                     Full gallery
-                    <input name="fullGalleryPrice" type="number" min="0" step="0.01" placeholder="225" className={fieldClassName()} />
+                    <input
+                      name="fullGalleryPrice"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      defaultValue={
+                        studioDefaults?.default_full_gallery_price_cents
+                          ? (studioDefaults.default_full_gallery_price_cents / 100).toString()
+                          : undefined
+                      }
+                      placeholder="225"
+                      className={fieldClassName()}
+                    />
                   </label>
                 </div>
               </div>
 
               <div className="space-y-3">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-stone-500">Watermark</p>
-                <input name="watermarkText" defaultValue="PROOF - PURCHASE TO DOWNLOAD" className={fieldClassName()} />
+                <input
+                  name="watermarkText"
+                  defaultValue={studioDefaults?.default_watermark_text ?? "PROOF - PURCHASE TO DOWNLOAD"}
+                  className={fieldClassName()}
+                />
                 <div className="grid grid-cols-2 gap-3">
-                  <select name="watermarkLayout" defaultValue="tile" className={fieldClassName()}>
+                  <select name="watermarkLayout" defaultValue={studioDefaults?.default_watermark_layout ?? "tile"} className={fieldClassName()}>
                     <option value="tile">Tiled diagonal</option>
                     <option value="center">Large center</option>
                   </select>
-                  <input name="watermarkOpacity" type="number" min="0.05" max="0.8" step="0.01" defaultValue="0.28" className={fieldClassName()} />
+                  <input name="watermarkOpacity" type="number" min="0.05" max="0.8" step="0.01" defaultValue={studioDefaults?.default_watermark_opacity ?? "0.28"} className={fieldClassName()} />
                 </div>
                 <div className="grid grid-cols-3 gap-3">
-                  <input name="watermarkSize" type="number" defaultValue="180" className={fieldClassName()} />
-                  <input name="watermarkSpacing" type="number" defaultValue="320" className={fieldClassName()} />
-                  <input name="watermarkAngle" type="number" defaultValue="-32" className={fieldClassName()} />
+                  <input name="watermarkSize" type="number" defaultValue={studioDefaults?.default_watermark_size ?? 180} className={fieldClassName()} />
+                  <input name="watermarkSpacing" type="number" defaultValue={studioDefaults?.default_watermark_spacing ?? 320} className={fieldClassName()} />
+                  <input name="watermarkAngle" type="number" defaultValue={studioDefaults?.default_watermark_angle ?? -32} className={fieldClassName()} />
                 </div>
+                <label className="grid gap-1 text-sm font-semibold text-stone-600">
+                  Download limit per paid order
+                  <input name="downloadLimit" type="number" min="1" defaultValue={studioDefaults?.default_download_limit ?? 5} className={fieldClassName()} />
+                </label>
               </div>
             </div>
 

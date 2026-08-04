@@ -6,6 +6,7 @@ import type { Photo } from "@/lib/types";
 
 export type DownloadRecord = {
   token_id: string;
+  studio_id: string;
   expires_at: string;
   max_downloads: number;
   download_count: number;
@@ -17,7 +18,7 @@ export type DownloadRecord = {
 
 export async function getDownloadRecord(token: string): Promise<DownloadRecord | null> {
   const { rows } = await sql<DownloadRecord>(
-    `select dt.id as token_id, dt.expires_at, dt.max_downloads, dt.download_count,
+    `select dt.id as token_id, o.studio_id, dt.expires_at, dt.max_downloads, dt.download_count,
       o.id as order_id, o.customer_email, g.title as gallery_title, g.slug as gallery_slug
      from download_tokens dt
      join orders o on o.id = dt.order_id
@@ -36,6 +37,7 @@ export async function getDownloadPhotos(orderId: string): Promise<Photo[]> {
     `select p.*
      from order_items oi
      join photos p on p.id = oi.photo_id
+     join orders o on o.id = oi.order_id and o.studio_id = p.studio_id
      where oi.order_id = $1
      order by p.sort_order, p.created_at`,
     [orderId],
@@ -50,6 +52,7 @@ export async function assertPaidPhotoAccess(token: string, photoId: string): Pro
     `select p.*
      from order_items oi
      join photos p on p.id = oi.photo_id
+     join orders o on o.id = oi.order_id and o.studio_id = p.studio_id
      where oi.order_id = $1 and p.id = $2`,
     [record.order_id, photoId],
   );

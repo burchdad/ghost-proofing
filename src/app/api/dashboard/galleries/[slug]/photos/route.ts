@@ -10,11 +10,11 @@ export async function POST(
   { params }: { params: Promise<{ slug: string }> },
 ) {
   const profile = await getCurrentProfile();
-  if (!profile || profile.role !== "admin") {
+  if (!profile || !["platform_admin", "photographer", "assistant", "admin"].includes(profile.role)) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
   const { slug } = await params;
-  const gallery = await getOwnedGallery(slug, profile.id);
+  const gallery = await getOwnedGallery(slug, profile);
   if (!gallery) {
     return NextResponse.json({ error: "Gallery not found." }, { status: 404 });
   }

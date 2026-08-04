@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, CalendarClock, Copy, ExternalLink, Images, ShoppingBag, ShieldCheck } from "lucide-react";
 import { PhotoUploadForm } from "@/app/dashboard/galleries/[slug]/PhotoUploadForm";
 import { updateGalleryStatusAction } from "@/app/dashboard/actions";
-import { requireAdmin } from "@/lib/auth";
+import { isPlatformAdmin, requireAdmin } from "@/lib/auth";
 import { getEnv } from "@/lib/env";
 import { money } from "@/lib/format";
 import { sql } from "@/lib/db";
@@ -23,18 +23,19 @@ export default async function GalleryAdminPage({
   params: Promise<{ slug: string }>;
 }) {
   const profile = await requireAdmin();
+  const platformAdmin = isPlatformAdmin(profile);
   const { slug } = await params;
   const { rows } = await sql<Gallery>(
-    "select * from galleries where slug = $1 and owner_id = $2",
-    [slug, profile.id],
+    "select * from galleries where slug = $1 and ($2::boolean = true or studio_id = $3)",
+    [slug, platformAdmin, profile.studio_id],
   );
   const gallery = rows[0];
   if (!gallery) {
     return <main className="p-8 text-stone-100">Gallery not found.</main>;
   }
   const [photoResult, orderResult] = await Promise.all([
-    sql<Photo>("select * from photos where gallery_id = $1 order by sort_order, created_at", [gallery.id]),
-    sql<Order>("select * from orders where gallery_id = $1 order by created_at desc limit 20", [gallery.id]),
+    sql<Photo>("select * from photos where gallery_id = $1 and studio_id = $2 order by sort_order, created_at", [gallery.id, gallery.studio_id]),
+    sql<Order>("select * from orders where gallery_id = $1 and studio_id = $2 order by created_at desc limit 20", [gallery.id, gallery.studio_id]),
   ]);
   const photos = photoResult.rows;
   const orders = orderResult.rows;

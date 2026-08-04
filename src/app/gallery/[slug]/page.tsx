@@ -55,8 +55,8 @@ export default async function PublicGalleryPage({
     );
   }
   const { rows: photos } = await sql<Photo>(
-    "select * from photos where gallery_id = $1 order by sort_order, created_at",
-    [gallery.id],
+    "select * from photos where gallery_id = $1 and studio_id = $2 order by sort_order, created_at",
+    [gallery.id, gallery.studio_id],
   );
   return (
     <main className="min-h-screen bg-[#050505] px-6 py-8 text-stone-100">

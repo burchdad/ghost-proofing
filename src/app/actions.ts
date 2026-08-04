@@ -21,11 +21,18 @@ export async function loginAction(formData: FormData) {
   let profile = rows[0];
   if (!profile && env.ADMIN_EMAIL && env.ADMIN_PASSWORD && email === env.ADMIN_EMAIL) {
     const passwordHash = await hashSecret(env.ADMIN_PASSWORD);
+    const studio = await sql<{ id: string }>(
+      `insert into studios (name, slug, contact_email, default_branding_name)
+       values ($1, 'main-studio', $2, $1)
+       on conflict (slug) do update set contact_email = excluded.contact_email
+       returning id`,
+      ["Ghost Proofing", env.ADMIN_EMAIL],
+    );
     const created = await sql<Profile & { password_hash: string | null }>(
-      `insert into profiles (email, display_name, role, password_hash)
-       values ($1, $2, 'admin', $3)
+      `insert into profiles (email, display_name, role, password_hash, studio_id)
+       values ($1, $2, 'platform_admin', $3, $4)
        returning id, email, display_name, role, branding_name, password_hash`,
-      [env.ADMIN_EMAIL, "Studio Admin", passwordHash],
+      [env.ADMIN_EMAIL, "Studio Admin", passwordHash, studio.rows[0].id],
     );
     profile = created.rows[0];
   }
