@@ -1,5 +1,5 @@
 {
-  "name": "ghost-proofing",
+  "name": "ghostphotos",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:migrate": "psql \"$env:DATABASE_URL\" -f migrations/001_initial.sql && psql \"$env:DATABASE_URL\" -f migrations/002_multi_studio.sql",
+    "db:migrate": "psql \"$env:DATABASE_URL\" -f migrations/001_initial.sql && psql \"$env:DATABASE_URL\" -f migrations/002_multi_studio.sql && psql \"$env:DATABASE_URL\" -f migrations/003_ghostphotos_domains.sql",
     "db:seed": "psql \"$env:DATABASE_URL\" -f db/seed.sql"
   },
   "dependencies": {

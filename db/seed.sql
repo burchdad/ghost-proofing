@@ -1,5 +1,5 @@
 insert into profiles (email, display_name, role, branding_name)
-values ('studio@example.com', 'Studio Admin', 'admin', 'Ghost Proofing')
+values ('studio@example.com', 'Studio Admin', 'admin', 'GhostPhotos')
 on conflict (email) do nothing;
 
 insert into galleries (

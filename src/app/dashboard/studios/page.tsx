@@ -3,6 +3,7 @@ import { ArrowLeft, Building2, KeyRound, Mail, Plus, UserRound } from "lucide-re
 import { createStudioMemberAction } from "@/app/dashboard/studios/actions";
 import { requirePlatformAdmin } from "@/lib/auth";
 import { money } from "@/lib/format";
+import { tenantBaseUrl } from "@/lib/public-studios";
 import { sql } from "@/lib/db";
 import type { Profile, Studio } from "@/lib/types";
 
@@ -79,8 +80,26 @@ export default async function StudiosPage() {
                 <input name="studioName" required placeholder="Example Photography" className={fieldClassName()} />
               </label>
               <label className="grid gap-1 text-sm font-semibold text-stone-600">
+                Public display name
+                <input name="publicName" placeholder="KB Photography" className={fieldClassName()} />
+              </label>
+              <label className="grid gap-1 text-sm font-semibold text-stone-600">
                 Optional studio URL slug
                 <input name="studioSlug" placeholder="example-photography" className={fieldClassName()} />
+              </label>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="grid gap-1 text-sm font-semibold text-stone-600">
+                  GhostPhotos subdomain
+                  <input name="subdomain" placeholder="kbphotography" className={fieldClassName()} />
+                </label>
+                <label className="grid gap-1 text-sm font-semibold text-stone-600">
+                  Custom domain
+                  <input name="customDomain" placeholder="kbphotography.com" className={fieldClassName()} />
+                </label>
+              </div>
+              <label className="grid gap-1 text-sm font-semibold text-stone-600">
+                Brand color
+                <input name="brandColor" type="color" defaultValue="#f7c948" className="h-11 w-full rounded-lg border border-stone-300 bg-white px-2 py-1" />
               </label>
               <label className="grid gap-1 text-sm font-semibold text-stone-600">
                 Photographer name
@@ -127,8 +146,17 @@ export default async function StudiosPage() {
                   <article key={studio.id} className="rounded-xl border border-stone-200 bg-stone-50 p-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
-                        <h3 className="text-lg font-semibold">{studio.name}</h3>
+                        <h3 className="text-lg font-semibold">{studio.public_name ?? studio.name}</h3>
                         <p className="mt-1 text-sm text-stone-500">{studio.slug}</p>
+                        <a
+                          href={tenantBaseUrl(studio)}
+                          className="mt-2 inline-flex max-w-full truncate rounded-lg bg-white px-3 py-2 text-sm font-semibold text-stone-700 ring-1 ring-stone-200 hover:ring-stone-950"
+                        >
+                          {tenantBaseUrl(studio)}
+                        </a>
+                        {studio.custom_domain ? (
+                          <p className="mt-2 text-xs font-medium text-stone-500">Custom domain: {studio.custom_domain}</p>
+                        ) : null}
                         {studio.contact_email ? (
                           <p className="mt-2 inline-flex items-center gap-2 text-sm text-stone-600">
                             <Mail className="h-4 w-4" />

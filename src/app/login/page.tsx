@@ -10,7 +10,7 @@ export default async function LoginPage({
     <main className="grid min-h-screen place-items-center bg-[#f7f4ee] px-5 py-10 text-stone-950">
       <form action={loginAction} className="w-full max-w-sm rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
         <div className="mb-6">
-          <p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-700">Studio access</p>
+          <p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-700">GhostPhotos access</p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight">Sign in</h1>
           <p className="mt-2 text-sm leading-6 text-stone-500">Manage proof galleries, uploads, checkout, and downloads.</p>
         </div>

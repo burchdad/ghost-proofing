@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ghost Proofing",
-  description: "Private proofing galleries for photographers and clients.",
+  title: "GhostPhotos",
+  description: "Client galleries, watermark proofing, and photo orders for working photographers.",
 };
 
 export default function RootLayout({

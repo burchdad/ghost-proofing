@@ -6,7 +6,12 @@ export type ProfileRole = "platform_admin" | "photographer" | "assistant" | "adm
 export type Studio = {
   id: string;
   name: string;
+  public_name: string;
   slug: string;
+  subdomain: string;
+  custom_domain: string | null;
+  logo_url: string | null;
+  brand_color: string;
   contact_email: string | null;
   default_branding_name: string;
   default_price_cents: number;

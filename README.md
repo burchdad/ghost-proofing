@@ -1,6 +1,6 @@
-# Ghost Proofing
+# GhostPhotos
 
-Ghost Proofing is a private photography proofing MVP. Photographers upload originals, the server generates Sharp watermarked previews, customers purchase selected photos or a full gallery through Stripe Checkout, and paid customers receive tokenized access to originals.
+GhostPhotos is a multi-studio photography proofing platform. Photographers upload originals, the server generates Sharp watermarked previews, customers purchase selected photos or a full gallery through Stripe Checkout, and paid customers receive tokenized access to originals.
 
 ## Architecture
 

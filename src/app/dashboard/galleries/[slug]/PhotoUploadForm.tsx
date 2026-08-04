@@ -124,7 +124,7 @@ export function PhotoUploadForm({ slug }: { slug: string }) {
         <div>
           <h2 className="text-lg font-semibold">Bulk import photos</h2>
           <p className="mt-1 text-sm leading-6 text-stone-500">
-            Drag in a full gallery or choose files. Ghost-Proofing uploads in {BATCH_SIZE}-photo batches and watermarks each preview.
+            Drag in a full gallery or choose files. GhostPhotos uploads in {BATCH_SIZE}-photo batches and watermarks each preview.
           </p>
         </div>
       </div>

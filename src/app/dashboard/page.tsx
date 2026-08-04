@@ -17,6 +17,7 @@ import { createGalleryAction } from "@/app/dashboard/actions";
 import { isPlatformAdmin, requireAdmin } from "@/lib/auth";
 import { getEnv } from "@/lib/env";
 import { money } from "@/lib/format";
+import { tenantBaseUrl } from "@/lib/public-studios";
 import { sql } from "@/lib/db";
 import type { Gallery, Studio } from "@/lib/types";
 
@@ -95,10 +96,10 @@ export default async function DashboardPage() {
               </Link>
             ) : null}
             <a
-              href="https://kaisynphotography.vercel.app"
+              href={studioDefaults ? tenantBaseUrl(studioDefaults) : "/studios"}
               className="inline-flex h-10 items-center rounded-lg border border-stone-300 bg-white px-3 text-sm font-semibold text-stone-700 hover:border-stone-950"
             >
-              Customer site
+              Client portal
             </a>
             <form action={logoutAction}>
               <button className="inline-flex h-10 items-center gap-2 rounded-lg border border-stone-300 bg-white px-3 text-sm font-semibold text-stone-700 hover:border-stone-950">
@@ -124,7 +125,7 @@ export default async function DashboardPage() {
               <p className="font-semibold">Protected delivery flow</p>
             </div>
             <p className="mt-3 text-sm leading-6 text-stone-300">
-              Originals stay private until Stripe confirms payment, then Ghost-Proofing issues short-lived download links.
+              Originals stay private until Stripe confirms payment, then GhostPhotos issues short-lived download links.
             </p>
           </div>
         </section>

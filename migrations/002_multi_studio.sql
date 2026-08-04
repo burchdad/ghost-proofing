@@ -3,7 +3,7 @@ create table if not exists studios (
   name text not null,
   slug text not null unique,
   contact_email text,
-  default_branding_name text not null default 'Ghost Proofing',
+  default_branding_name text not null default 'GhostPhotos',
   default_price_cents integer not null default 2500 check (default_price_cents >= 0),
   default_full_gallery_price_cents integer check (default_full_gallery_price_cents is null or default_full_gallery_price_cents >= 0),
   default_watermark_text text not null default 'PROOF - PURCHASE TO DOWNLOAD',
@@ -29,7 +29,7 @@ alter table orders add column if not exists studio_id uuid references studios(id
 
 with existing as (
   select
-    coalesce(max(branding_name), 'Ghost Proofing') as branding_name,
+    coalesce(max(branding_name), 'GhostPhotos') as branding_name,
     coalesce(min(email), 'studio@example.com') as email
   from profiles
 ), inserted as (

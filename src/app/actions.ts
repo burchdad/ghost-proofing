@@ -22,11 +22,11 @@ export async function loginAction(formData: FormData) {
   if (!profile && env.ADMIN_EMAIL && env.ADMIN_PASSWORD && email === env.ADMIN_EMAIL) {
     const passwordHash = await hashSecret(env.ADMIN_PASSWORD);
     const studio = await sql<{ id: string }>(
-      `insert into studios (name, slug, contact_email, default_branding_name)
-       values ($1, 'main-studio', $2, $1)
+      `insert into studios (name, public_name, slug, subdomain, contact_email, default_branding_name)
+       values ($1, $1, 'main-studio', 'main-studio', $2, $1)
        on conflict (slug) do update set contact_email = excluded.contact_email
        returning id`,
-      ["Ghost Proofing", env.ADMIN_EMAIL],
+      ["GhostPhotos", env.ADMIN_EMAIL],
     );
     const created = await sql<Profile & { password_hash: string | null }>(
       `insert into profiles (email, display_name, role, password_hash, studio_id)

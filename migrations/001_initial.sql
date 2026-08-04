@@ -16,7 +16,7 @@ create table if not exists profiles (
   display_name text not null,
   role text not null check (role in ('admin', 'customer')) default 'admin',
   password_hash text,
-  branding_name text not null default 'Ghost Proofing',
+  branding_name text not null default 'GhostPhotos',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
