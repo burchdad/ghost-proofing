@@ -48,11 +48,12 @@ export async function POST(
   }
 
   const stripe = getStripe();
+  const origin = request.nextUrl.origin;
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     customer_email: email,
-    success_url: `${env.APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${env.APP_URL}/gallery/${gallery.slug}`,
+    success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}/gallery/${gallery.slug}`,
     metadata: {
       orderId,
       galleryId: gallery.id,

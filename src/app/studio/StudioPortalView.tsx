@@ -39,7 +39,7 @@ export function StudioPortalView({
             <div>
               <h1 className="text-5xl font-semibold tracking-tight">{studio.public_name ?? studio.name}</h1>
               <p className="mt-3 max-w-2xl text-stone-600">
-                Choose your private proof gallery below. Each photographer keeps galleries separated by studio, client, and order.
+                {studio.client_intro}
               </p>
             </div>
             {studio.contact_email ? (

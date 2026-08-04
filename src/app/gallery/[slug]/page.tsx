@@ -2,7 +2,7 @@ import { GalleryClient } from "@/app/gallery/[slug]/GalleryClient";
 import { unlockGalleryAction } from "@/app/gallery/[slug]/actions";
 import { hasGalleryAccess } from "@/lib/auth";
 import { sql } from "@/lib/db";
-import type { Gallery, Photo } from "@/lib/types";
+import type { Gallery, Photo, Studio } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 type PublicGallery = Gallery & { password_hash: string | null };
@@ -54,22 +54,32 @@ export default async function PublicGalleryPage({
       </main>
     );
   }
-  const { rows: photos } = await sql<Photo>(
-    "select * from photos where gallery_id = $1 and studio_id = $2 order by sort_order, created_at",
-    [gallery.id, gallery.studio_id],
-  );
+  const [photoResult, studioResult] = await Promise.all([
+    sql<Photo>(
+      "select * from photos where gallery_id = $1 and studio_id = $2 order by sort_order, created_at",
+      [gallery.id, gallery.studio_id],
+    ),
+    sql<Studio>("select * from studios where id = $1", [gallery.studio_id]),
+  ]);
+  const photos = photoResult.rows;
+  const studio = studioResult.rows[0];
   return (
     <main className="min-h-screen bg-[#050505] px-6 py-8 text-stone-100">
       <div className="mx-auto max-w-7xl">
         <header className="mb-8 border-b border-white/10 pb-6">
-          <p className="text-sm uppercase tracking-[0.28em] text-amber-200/80">Private gallery</p>
+          <p className="text-sm uppercase tracking-[0.28em] text-amber-200/80">{studio?.public_name ?? "Private gallery"}</p>
           <h1 className="mt-3 text-4xl font-semibold">{gallery.title}</h1>
           <p className="mt-2 text-stone-400">{gallery.customer_name}</p>
+          {studio?.terms_url ? (
+            <a href={studio.terms_url} className="mt-3 inline-flex text-sm font-semibold text-amber-100 hover:text-white">
+              Terms and policies
+            </a>
+          ) : null}
         </header>
         {photos.length === 0 ? (
           <div className="rounded-md border border-white/10 p-8 text-stone-400">No proofs are available yet.</div>
         ) : (
-          <GalleryClient gallery={gallery} photos={photos} />
+          <GalleryClient gallery={gallery} photos={photos} paymentNote={studio?.stripe_payment_note} refundPolicy={studio?.refund_policy} />
         )}
       </div>
     </main>

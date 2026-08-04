@@ -18,10 +18,10 @@ export default function Home() {
               Client portals
             </Link>
             <Link
-              href="/login"
+              href="/signup"
               className="inline-flex h-11 items-center rounded-lg bg-stone-950 px-4 text-sm font-semibold text-white hover:bg-stone-800"
             >
-              Photographer login
+              Start studio
             </Link>
           </div>
         </nav>
@@ -40,7 +40,7 @@ export default function Home() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              href="/login"
+              href="/signup"
               className="inline-flex h-12 items-center rounded-lg bg-stone-950 px-5 text-sm font-semibold text-white hover:bg-stone-800"
             >
               Set up a studio

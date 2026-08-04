@@ -12,6 +12,11 @@ export type Studio = {
   custom_domain: string | null;
   logo_url: string | null;
   brand_color: string;
+  client_intro: string;
+  terms_url: string | null;
+  refund_policy: string;
+  gallery_published_email_enabled: boolean;
+  stripe_payment_note: string;
   contact_email: string | null;
   default_branding_name: string;
   default_price_cents: number;

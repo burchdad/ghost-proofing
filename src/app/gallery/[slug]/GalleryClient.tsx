@@ -5,7 +5,17 @@ import { ShoppingBag, X } from "lucide-react";
 import { money } from "@/lib/format";
 import type { Gallery, Photo } from "@/lib/types";
 
-export function GalleryClient({ gallery, photos }: { gallery: Gallery; photos: Photo[] }) {
+export function GalleryClient({
+  gallery,
+  photos,
+  paymentNote,
+  refundPolicy,
+}: {
+  gallery: Gallery;
+  photos: Photo[];
+  paymentNote?: string;
+  refundPolicy?: string;
+}) {
   const [selected, setSelected] = useState<string[]>([]);
   const [email, setEmail] = useState(gallery.customer_email);
   const [fullGallery, setFullGallery] = useState(false);
@@ -95,7 +105,13 @@ export function GalleryClient({ gallery, photos }: { gallery: Gallery; photos: P
             {loading ? "Starting checkout..." : "Checkout"}
           </button>
           <p className="mt-4 text-xs leading-5 text-stone-500">
-            Preview saving deterrents are cosmetic. Original access is protected by private storage, verified payment, and expiring signed links.
+            {paymentNote ?? "Payments are processed securely through Stripe."}
+          </p>
+          {refundPolicy ? (
+            <p className="mt-3 text-xs leading-5 text-stone-500">{refundPolicy}</p>
+          ) : null}
+          <p className="mt-3 text-xs leading-5 text-stone-500">
+            Original access is protected by private storage, verified payment, and expiring signed links.
           </p>
         </div>
       </aside>

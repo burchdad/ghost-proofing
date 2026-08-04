@@ -49,6 +49,14 @@ export function tenantBaseUrl(studio: Pick<Studio, "slug" | "subdomain" | "custo
   return `${platformBaseUrl()}/studio/${studio.slug}`;
 }
 
+export function galleryPublicUrl(studio: Pick<Studio, "slug" | "subdomain" | "custom_domain">, gallerySlug: string) {
+  const env = getEnv();
+  if (studio.custom_domain || env.GHOSTPHOTOS_ROOT_DOMAIN) {
+    return `${tenantBaseUrl(studio)}/gallery/${gallerySlug}`;
+  }
+  return `${platformBaseUrl()}/gallery/${gallerySlug}`;
+}
+
 export async function requestHost() {
   const headerStore = await headers();
   return normalizeHost(headerStore.get("x-forwarded-host") ?? headerStore.get("host"));

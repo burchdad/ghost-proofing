@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin, hashSecret } from "@/lib/auth";
+import { sendGalleryPublishedEmail } from "@/lib/email";
 import { safeSlug } from "@/lib/format";
 import { sql } from "@/lib/db";
 import { getOwnedGallery, processGalleryPhotos } from "@/lib/gallery-uploads";
@@ -80,6 +81,14 @@ export async function updateGalleryStatusAction(formData: FormData) {
   const profile = await requireAdmin();
   const slug = String(formData.get("slug"));
   const status = String(formData.get("status"));
+  const galleryResult = await sql<import("@/lib/types").Gallery>(
+    "select * from galleries where slug = $1 and ($2::boolean = true or studio_id = $3)",
+    [slug, profile.role === "platform_admin", profile.studio_id],
+  );
+  const gallery = galleryResult.rows[0];
+  if (!gallery) {
+    throw new Error("Gallery not found.");
+  }
   if (profile.role === "platform_admin") {
     await sql("update galleries set status = $1 where slug = $2", [status, slug]);
   } else {
@@ -88,6 +97,13 @@ export async function updateGalleryStatusAction(formData: FormData) {
       slug,
       profile.studio_id,
     ]);
+  }
+  if (status === "published" && gallery.status !== "published") {
+    const studioResult = await sql<import("@/lib/types").Studio>("select * from studios where id = $1", [gallery.studio_id]);
+    const studio = studioResult.rows[0];
+    if (studio) {
+      await sendGalleryPublishedEmail({ gallery: { ...gallery, status: "published" }, studio });
+    }
   }
   revalidatePath("/dashboard");
   revalidatePath(`/dashboard/galleries/${slug}`);

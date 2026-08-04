@@ -1,10 +1,13 @@
 "use server";
 
 import bcrypt from "bcryptjs";
+import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getEnv } from "@/lib/env";
 import { hashSecret, signSession, verifySecret } from "@/lib/auth";
+import { normalizeColor, normalizeSubdomain } from "@/lib/forms";
+import { safeSlug } from "@/lib/format";
 import { sql } from "@/lib/db";
 import type { Profile } from "@/lib/types";
 
@@ -71,4 +74,63 @@ export async function logoutAction() {
   const jar = await cookies();
   jar.delete(env.AUTH_COOKIE_NAME);
   redirect("/login");
+}
+
+export async function signupAction(formData: FormData) {
+  const studioName = String(formData.get("studioName") ?? "").trim();
+  const photographerName = String(formData.get("photographerName") ?? "").trim();
+  const email = String(formData.get("email") ?? "").toLowerCase().trim();
+  const password = String(formData.get("password") ?? "");
+  const baseSlug = safeSlug(String(formData.get("subdomain") || studioName));
+  const subdomain = normalizeSubdomain(formData.get("subdomain"), studioName);
+
+  if (!studioName || !photographerName || !email.includes("@") || password.length < 8 || !subdomain) {
+    redirect("/signup?error=invalid");
+  }
+
+  const existing = await sql<{ id: string }>(
+    `select id from profiles where lower(email) = lower($1)
+     union
+     select id from studios where lower(subdomain) = lower($2)
+     limit 1`,
+    [email, subdomain],
+  );
+  if (existing.rows.length > 0) {
+    redirect("/signup?error=taken");
+  }
+
+  const passwordHash = await hashSecret(password);
+  const studio = await sql<{ id: string }>(
+    `insert into studios (
+      name, public_name, slug, subdomain, contact_email, default_branding_name,
+      brand_color, default_watermark_text
+    )
+    values ($1,$1,$2,$3,$4,$1,$5,$6)
+    returning id`,
+    [
+      studioName,
+      `${baseSlug || "studio"}-${randomUUID().slice(0, 6)}`,
+      subdomain,
+      email,
+      normalizeColor(formData.get("brandColor")),
+      `${studioName.toUpperCase()} PROOF`,
+    ],
+  );
+  const profile = await sql<{ id: string }>(
+    `insert into profiles (email, display_name, role, password_hash, studio_id, branding_name)
+     values ($1,$2,'photographer',$3,$4,$5)
+     returning id`,
+    [email, photographerName, passwordHash, studio.rows[0].id, studioName],
+  );
+
+  const jar = await cookies();
+  const env = getEnv();
+  jar.set(env.AUTH_COOKIE_NAME, await signSession(profile.rows[0].id), {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 14,
+  });
+  redirect("/dashboard/settings?welcome=1");
 }
